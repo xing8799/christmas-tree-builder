@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台管理 - 圣诞树合成器</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+:root{--bg:#080c0a;--fg:#f0ece4;--muted:#6b7c6f;--accent:#c41e3a;--gold:#d4a843;--card:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);--green-deep:#0d2818;--green:#1a5c2a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh}
+::selection{background:var(--accent);color:#fff}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:9px}
+
+header{height:56px;background:linear-gradient(90deg,var(--green-deep),rgba(13,40,24,0.95));border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px}
+.logo{font-family:'Playfair Display',serif;font-weight:900;font-size:18px;color:var(--gold);white-space:nowrap}
+.logo i{color:var(--accent);margin-right:6px}
+.header-right{margin-left:auto;display:flex;gap:10px}
+
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 40%,rgba(26,92,42,0.2),transparent 70%)}
+.login-box{background:linear-gradient(160deg,#111a14,#0a0f0d);border:1px solid var(--border);border-radius:16px;padding:40px;width:360px;max-width:90vw;text-align:center}
+.login-box h2{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:8px;font-size:24px}
+.login-box p{color:var(--muted);font-size:13px;margin-bottom:24px}
+.login-box input{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,0.3);color:var(--fg);font-size:15px;font-family:inherit;outline:none;margin-bottom:16px;transition:border-color .2s}
+.login-box input:focus{border-color:var(--gold)}
+.login-error{color:var(--accent);font-size:13px;margin-bottom:12px;min-height:20px}
+
+.admin-body{display:none;padding:24px;max-width:1200px;margin:0 auto}
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:0}
+.tab{padding:12px 24px;font-size:14px;color:var(--muted);cursor:pointer;border:none;background:transparent;font-family:inherit;border-bottom:2px solid transparent;transition:all .2s}
+.tab:hover{color:var(--fg)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-content{display:none}.tab-content.active{display:block}
+
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px}
+.section-header h3{font-size:18px;font-weight:700}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:16px;transition:border-color .2s}
+.card:hover{border-color:rgba(255,255,255,0.12)}
+.card-preview{width:80px;height:80px;border-radius:8px;background:repeating-conic-gradient(rgba(255,255,255,0.03) 0% 25%,transparent 0% 50%) 50%/12px 12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.card-preview img{max-width:90%;max-height:90%;object-fit:contain}
+.card-info{flex:1;min-width:0}
+.card-info h4{font-size:15px;font-weight:500;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-info p{font-size:12px;color:var(--muted);line-height:1.5}
+.card-info .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;background:rgba(212,168,67,0.12);color:var(--gold);margin-right:6px;margin-top:4px}
+.card-actions{display:flex;gap:6px;flex-shrink:0}
+
+.btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:13px;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;transition:all .2s;white-space:nowrap}
+.btn:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15)}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-accent:hover{background:#a8182f}
+.btn-sm{padding:6px 10px;font-size:12px}
+.btn-danger{color:var(--accent);border-color:rgba(196,30,58,0.3)}
+.btn-danger:hover{background:var(--accent);color:#fff}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:5000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex}
+.modal{background:linear-gradient(160deg,#111a14,#0a0f0d);border:1px solid var(--border);border-radius:16px;padding:28px;min-width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.modal h3{font-family:'Playfair Display',serif;font-size:20px;color:var(--gold);margin-bottom:16px}
+.modal input,.modal select{width:100%;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,0.3);color:var(--fg);font-size:14px;font-family:inherit;margin-bottom:12px;outline:none;transition:border-color .2s}
+.modal input:focus,.modal select:focus{border-color:var(--gold)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.file-drop{border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;color:var(--muted);font-size:13px}
+.file-drop:hover,.file-drop.dragover{border-color:var(--gold);color:var(--gold);background:rgba(212,168,67,0.04)}
+.file-drop i{font-size:28px;display:block;margin-bottom:8px}
+.file-drop input{display:none}
+.file-drop .done{color:var(--green)}
+
+.cat-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.cat-item{padding:6px 14px;border-radius:20px;font-size:13px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;gap:6px}
+.cat-item span{cursor:default}
+.cat-item button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0;transition:color .2s}
+.cat-item button:hover{color:var(--accent)}
+.add-cat-row{display:flex;gap:8px}
+.add-cat-row input{flex:1}
+
+.toast-container{position:fixed;top:70px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 18px;border-radius:8px;font-size:13px;color:#fff;animation:toastIn .3s ease;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.toast-success{background:var(--green)}.toast-error{background:var(--accent)}.toast-info{background:rgba(30,30,30,0.95);border:1px solid var(--border)}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+.empty-state{text-align:center;padding:40px;color:var(--muted);font-size:14px}
+.empty-state i{font-size:40px;color:var(--border);display:block;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div class="login-wrap" id="loginPage">
+  <div class="login-box">
+    <h2>后台管理</h2>
+    <p>请输入管理员密码以继续</p>
+    <div class="login-error" id="loginError"></div>
+    <input type="password" id="loginPwd" placeholder="管理员密码" autofocus>
+    <button class="btn btn-accent" style="width:100%;justify-content:center;padding:12px" id="loginBtn"><i class="fas fa-sign-in-alt"></i>登录</button>
+  </div>
+</div>
+
+<!-- 管理后台 -->
+<header id="adminHeader" style="display:none">
+  <div class="logo"><i class="fas fa-tree"></i>Tree Designer</div>
+  <span style="font-size:13px;color:var(--muted)">后台管理</span>
+  <div class="header-right">
+    <a href="/" class="btn" style="text-decoration:none"><i class="fas fa-arrow-left"></i>返回前台</a>
+    <button class="btn btn-sm" id="btnLogout"><i class="fas fa-sign-out-alt"></i>退出</button>
+  </div>
+</header>
+
+<div class="admin-body" id="adminBody">
+  <div class="tabs">
+    <button class="tab active" data-tab="trees"><i class="fas fa-tree" style="margin-right:6px"></i>圣诞树管理</button>
+    <button class="tab" data-tab="ornaments"><i class="fas fa-star" style="margin-right:6px"></i>配饰管理</button>
+    <button class="tab" data-tab="categories"><i class="fas fa-tags" style="margin-right:6px"></i>分类管理</button>
+  </div>
+
+  <!-- 圣诞树管理 -->
+  <div class="tab-content active" id="tab-trees">
+    <div class="section-header">
+      <h3>圣诞树列表</h3>
+      <button class="btn btn-accent" id="btnAddTree"><i class="fas fa-plus"></i>上传圣诞树</button>
+    </div>
+    <div id="treeList"></div>
+  </div>
+
+  <!-- 配饰管理 -->
+  <div class="tab-content" id="tab-ornaments">
+    <div class="section-header">
+      <h3>配饰列表</h3>
+      <button class="btn btn-accent" id="btnAddOrn"><i class="fas fa-plus"></i>上传配饰</button>
+    </div>
+    <div id="ornList"></div>
+  </div>
+
+  <!-- 分类管理 -->
+  <div class="tab-content" id="tab-categories">
+    <div class="section-header"><h3>分类列表</h3></div>
+    <div class="cat-list" id="catList"></div>
+    <div class="add-cat-row">
+      <input type="text" id="newCatName" placeholder="新分类名称">
+      <button class="btn btn-accent" id="btnAddCat"><i class="fas fa-plus"></i>添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- 上传圣诞树模态框 -->
+<div class="modal-overlay" id="modalTree">
+  <div class="modal">
+    <h3>上传圣诞树</h3>
+    <div class="file-drop" id="treeFileDrop">
+      <i class="fas fa-cloud-arrow-up"></i>点击或拖拽PNG图片到这里
+      <input type="file" id="treeFileInput" accept=".png,image/png">
+    </div>
+    <input type="text" id="treeName" placeholder="树款名称，如：经典松树">
+    <select id="treeSize"><option value="45cm">45cm</option><option value="60cm">60cm</option></select>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modalTree')">取消</button>
+      <button class="btn btn-accent" id="btnSubmitTree">上传</button>
+    </div>
+  </div>
+</div>
+
+<!-- 上传配饰模态框 -->
+<div class="modal-overlay" id="modalOrn">
+  <div class="modal">
+    <h3>上传配饰</h3>
+    <div class="file-drop" id="ornFileDrop">
+      <i class="fas fa-cloud-arrow-up"></i>点击或拖拽PNG图片到这里
+      <input type="file" id="ornFileInput" accept=".png,image/png">
+    </div>
+    <input type="text" id="ornName" placeholder="配饰名称，如：红色彩球">
+    <select id="ornCategory"></select>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modalOrn')">取消</button>
+      <button class="btn btn-accent" id="btnSubmitOrn">上传</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ===== 工具 ===== */
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = 'toast toast-' + type;
+  el.textContent = msg;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(() => el.remove(), 300); }, 2500);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+async function api(method, url, body) {
+  try {
+    const opts = { method };
+    if (body instanceof FormData) { opts.body = body; }
+    else if (body) { opts.headers = {'Content-Type':'application/json'}; opts.body = JSON.stringify(body); }
+    const r = await fetch(url, opts);
+    if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || r.statusText); }
+    return await r.json();
+  } catch (e) {
+    toast('请求失败: ' + e.message, 'error');
+    return null;
+  }
+}
+
+/* ===== 登录 ===== */
+document.getElementById('loginBtn').onclick = doLogin;
+document.getElementById('loginPwd').onkeydown = e => { if (e.key === 'Enter') doLogin(); };
+
+async function doLogin() {
+  const pwd = document.getElementById('loginPwd').value;
+  if (!pwd) { document.getElementById('loginError').textContent = '请输入密码'; return; }
+  const res = await api('POST', '/api/login', { password: pwd });
+  if (res && res.success) {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('adminHeader').style.display = 'flex';
+    document.getElementById('adminBody').style.display = 'block';
+    await loadAll();
+  } else {
+    document.getElementById('loginError').textContent = '密码错误';
+  }
+}
+
+document.getElementById('btnLogout').onclick = () => {
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('adminHeader').style.display = 'none';
+  document.getElementById('adminBody').style.display = 'none';
+  document.getElementById('loginPwd').value = '';
+  document.getElementById('loginError').textContent = '';
+};
+
+/* ===== 标签切换 ===== */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  };
+});
+
+/* ===== 加载数据 ===== */
+let trees = [], ornaments = [], categories = [];
+
+async function loadAll() {
+  const [t, o, c] = await Promise.all([
+    api('GET', '/api/trees'),
+    api('GET', '/api/ornaments'),
+    api('GET', '/api/categories')
+  ]);
+  if (t) trees = t;
+  if (o) ornaments = o;
+  if (c) categories = c;
+  renderTrees();
+  renderOrnaments();
+  renderCategories();
+  updateCatSelect();
+}
+
+/* ===== 圣诞树管理 ===== */
+function renderTrees() {
+  const el = document.getElementById('treeList');
+  if (trees.length === 0) { el.innerHTML = '<div class="empty-state"><i class="fas fa-tree"></i>暂无圣诞树，点击上方按钮上传</div>'; return; }
+  el.innerHTML = trees.map(t => `
+    <div class="card">
+      <div class="card-preview"><img src="${t.imageUrl}" alt="${t.name}"></div>
+      <div class="card-info">
+        <h4>${t.name}</h4>
+        <p><span class="tag">${t.size}</span>${new Date(t.createdAt).toLocaleDateString('zh-CN')}</p>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-sm btn-danger" onclick="deleteTree('${t.id}')"><i class="fas fa-trash"></i>删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 上传圣诞树文件处理
+let pendingTreeFile = null;
+const treeFileDrop = document.getElementById('treeFileDrop');
+const treeFileInput = document.getElementById('treeFileInput');
+
+document.getElementById('btnAddTree').onclick = () => { pendingTreeFile = null; document.getElementById('treeName').value = ''; document.getElementById('treeSize').value = '45cm'; treeFileDrop.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>点击或拖拽PNG图片到这里<input type="file" id="treeFileInput" accept=".png,image/png">'; bindTreeFileInput(); document.getElementById('modalTree').classList.add('show'); };
+
+function bindTreeFileInput() {
+  const inp = document.getElementById('treeFileInput');
+  if (!inp) return;
+  inp.onchange = () => { if (inp.files[0]) { pendingTreeFile = inp.files[0]; treeFileDrop.innerHTML = `<i class="fas fa-check-circle done"></i>${pendingTreeFile.name}`; } };
+  treeFileDrop.onclick = () => inp.click();
+  treeFileDrop.ondragover = e => { e.preventDefault(); treeFileDrop.classList.add('dragover'); };
+  treeFileDrop.ondragleave = () => treeFileDrop.classList.remove('dragover');
+  treeFileDrop.ondrop = e => { e.preventDefault(); treeFileDrop.classList.remove('dragover'); if (e.dataTransfer.files[0]) { pendingTreeFile = e.dataTransfer.files[0]; treeFileDrop.innerHTML = `<i class="fas fa-check-circle done"></i>${pendingTreeFile.name}`; } };
+}
+bindTreeFileInput();
+
+document.getElementById('btnSubmitTree').onclick = async () => {
+  if (!pendingTreeFile) { toast('请选择图片', 'error'); return; }
+  const fd = new FormData();
+  fd.append('image', pendingTreeFile);
+  fd.append('name', document.getElementById('treeName').value || '未命名');
+  fd.append('size', document.getElementById('treeSize').value);
+  const res = await api('POST', '/api/trees', fd);
+  if (res) { toast('上传成功', 'success'); closeModal('modalTree'); loadAll(); }
+};
+
+async function deleteTree(id) {
+  if (!confirm('确定要删除这个圣诞树吗？')) return;
+  const ok = await api('DELETE', '/api/trees/' + id);
+  if (ok !== null) { toast('已删除', 'success'); loadAll(); }
+}
+
+/* ===== 配饰管理 ===== */
+function renderOrnaments() {
+  const el = document.getElementById('ornList');
+  if (ornaments.length === 0) { el.innerHTML = '<div class="empty-state"><i class="fas fa-star"></i>暂无配饰，点击上方按钮上传</div>'; return; }
+  el.innerHTML = ornaments.map(o => `
+    <div class="card">
+      <div class="card-preview"><img src="${o.imageUrl}" alt="${o.name}"></div>
+      <div class="card-info">
+        <h4>${o.name}</h4>
+        <p><span class="tag">${o.category}</span>${new Date(o.createdAt).toLocaleDateString('zh-CN')}</p>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-sm btn-danger" onclick="deleteOrn('${o.id}')"><i class="fas fa-trash"></i>删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+let pendingOrnFile = null;
+const ornFileDrop = document.getElementById('ornFileDrop');
+const ornFileInput = document.getElementById('ornFileInput');
+
+document.getElementById('btnAddOrn').onclick = () => {
+  pendingOrnFile = null;
+  document.getElementById('ornName').value = '';
+  updateCatSelect();
+  ornFileDrop.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>点击或拖拽PNG图片到这里<input type="file" id="ornFileInput" accept=".png,image/png">';
+  bindOrnFileInput();
+  document.getElementById('modalOrn').classList.add('show');
+};
+
+function updateCatSelect() {
+  const sel = document.getElementById('ornCategory');
+  sel.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+function bindOrnFileInput() {
+  const inp = document.getElementById('ornFileInput');
+  if (!inp) return;
+  inp.onchange = () => { if (inp.files[0]) { pendingOrnFile = inp.files[0]; ornFileDrop.innerHTML = `<i class="fas fa-check-circle done"></i>${pendingOrnFile.name}`; } };
+  ornFileDrop.onclick = () => inp.click();
+  ornFileDrop.ondragover = e => { e.preventDefault(); ornFileDrop.classList.add('dragover'); };
+  ornFileDrop.ondragleave = () => ornFileDrop.classList.remove('dragover');
+  ornFileDrop.ondrop = e => { e.preventDefault(); ornFileDrop.classList.remove('dragover'); if (e.dataTransfer.files[0]) { pendingOrnFile = e.dataTransfer.files[0]; ornFileDrop.innerHTML = `<i class="fas fa-check-circle done"></i>${pendingOrnFile.name}`; } };
+}
+bindOrnFileInput();
+
+document.getElementById('btnSubmitOrn').onclick = async () => {
+  if (!pendingOrnFile) { toast('请选择图片', 'error'); return; }
+  const fd = new FormData();
+  fd.append('image', pendingOrnFile);
+  fd.append('name', document.getElementById('ornName').value || '未命名');
+  fd.append('category', document.getElementById('ornCategory').value);
+  const res = await api('POST', '/api/ornaments', fd);
+  if (res) { toast('上传成功', 'success'); closeModal('modalOrn'); loadAll(); }
+};
+
+async function deleteOrn(id) {
+  if (!confirm('确定要删除这个配饰吗？')) return;
+  const ok = await api('DELETE', '/api/ornaments/' + id);
+  if (ok !== null) { toast('已删除', 'success'); loadAll(); }
+}
+
+/* ===== 分类管理 ===== */
+function renderCategories() {
+  const el = document.getElementById('catList');
+  if (categories.length === 0) { el.innerHTML = '<div class="empty-state"><i class="fas fa-tags"></i>暂无分类</div>'; return; }
+  el.innerHTML = categories.map(c => `
+    <div class="cat-item"><span>${c}</span><button onclick="deleteCat('${c}')" title="删除"><i class="fas fa-times"></i></button></div>
+  `).join('');
+}
+
+document.getElementById('btnAddCat').onclick = async () => {
+  const name = document.getElementById('newCatName').value.trim();
+  if (!name) { toast('请输入分类名称', 'error'); return; }
+  const res = await api('POST', '/api/categories', { name });
+  if (res) { toast('已添加', 'success'); document.getElementById('newCatName').value = ''; loadAll(); }
+};
+
+async function deleteCat(name) {
+  const ok = await api('DELETE', '/api/categories/' + encodeURIComponent(name));
+  if (ok !== null) { toast('已删除', 'success'); loadAll(); }
+}
+</script>
+</body>
+</html>
