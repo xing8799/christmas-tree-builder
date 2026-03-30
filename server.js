@@ -52,11 +52,13 @@ function makeStorage(dest) {
   });
 }
 
-const pngFilter = (req, file, cb) => {
-  if (file.mimetype === 'image/png' || path.extname(file.originalname).toLowerCase() === '.png') {
+const imgFilter = (req, file, cb) => {
+  const ok = ['image/png', 'image/jpeg', 'image/jpg'];
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (ok.includes(file.mimetype) || ['.png', '.jpg', '.jpeg'].includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('仅支持 PNG 格式图片'));
+    cb(new Error('仅支持 PNG / JPG 格式图片'));
   }
 };
 
