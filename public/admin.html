@@ -283,7 +283,8 @@ let pendingTreeFile = null;
 const treeFileDrop = document.getElementById('treeFileDrop');
 const treeFileInput = document.getElementById('treeFileInput');
 
-document.getElementById('btnAddTree').onclick = () => { pendingTreeFile = null; document.getElementById('treeName').value = ''; document.getElementById('treeSize').value = '45cm'; treeFileDrop.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>点击或拖拽PNG图片到这里<input type="file" id="treeFileInput" accept=".png,image/png">'; bindTreeFileInput(); document.getElementById('modalTree').classList.add('show'); };
+document.getElementById('btnAddTree').onclick = () => { pendingTreeFile = null; document.getElementById('treeName').value = ''; document.getElementById('treeSize').value = '45cm'; treeFileDrop.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>点击或拖拽PNG/JPG图片到这里<input type="file" id="treeFileInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg">';
+                                                       bindTreeFileInput(); document.getElementById('modalTree').classList.add('show'); };
 
 function bindTreeFileInput() {
   const inp = document.getElementById('treeFileInput');
@@ -338,7 +339,7 @@ document.getElementById('btnAddOrn').onclick = () => {
   pendingOrnFile = null;
   document.getElementById('ornName').value = '';
   updateCatSelect();
-  ornFileDrop.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>点击或拖拽PNG图片到这里<input type="file" id="ornFileInput" accept=".png,image/png">';
+  ornFileDrop.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>点击或拖拽PNG/JPG图片到这里<input type="file" id="ornFileInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg">';
   bindOrnFileInput();
   document.getElementById('modalOrn').classList.add('show');
 };
