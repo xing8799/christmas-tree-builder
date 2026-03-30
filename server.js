@@ -62,8 +62,8 @@ const imgFilter = (req, file, cb) => {
   }
 };
 
-const uploadTree = multer({ storage: makeStorage(UPLOADS_TREES), fileFilter: pngFilter });
-const uploadOrn = multer({ storage: makeStorage(UPLOADS_ORNS), fileFilter: pngFilter });
+const uploadTree = multer({ storage: makeStorage(UPLOADS_TREES), fileFilter: imgFilter });
+const uploadOrn = multer({ storage: makeStorage(UPLOADS_ORNS), fileFilter: imgFilter });
 
 /* ===== 管理员密码 ===== */
 const ADMIN_PWD = process.env.ADMIN_PASSWORD || 'xmas2024';
