@@ -938,7 +938,7 @@ function bindEvents() {
       editor.addItem(reader.result, name);
       modal.classList.remove('show');
       pendingLocalFile = null;
-      fileDrop.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>点击或拖拽PNG图片到这里<input type="file" id="localFileInput" accept=".png,image/png">';
+      fileDrop.innerHTML = '<i class="fas fa-cloud-arrow-up"></i>点击或拖拽PNG/JPG图片到这里<input type="file" id="localFileInput" accept=".png,.jpg,.jpeg,image/png,image/jpeg">';
       document.getElementById('localOrnName').value = '';
       // 重新绑定fileInput事件（因为innerHTML替换了）
       const newInput = fileDrop.querySelector('input');
